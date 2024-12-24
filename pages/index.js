@@ -1,5 +1,9 @@
 import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
+import AnimatedBeam from "@/components/animata/background/animated-beam";
+import { useForm } from "react-hook-form";
+import { getResp } from "@/helper/aiResponse";
+import { useState } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,103 +16,199 @@ const geistMono = Geist_Mono({
 });
 
 export default function Home() {
-  return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              pages/index.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+  const [dietData,setDietData] = useState();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const onSubmit = (data) => {
+    const { gender, height, currentWeight, targetWeight, age } = data;
+    console.log(gender, height, age, currentWeight, targetWeight);
+    getResp(gender, height, age, currentWeight, targetWeight).then((resp) => {
+      console.log(resp);
+      setDietData(resp);
+    });
+  };
+
+  return (
+    <>
+      <AnimatedBeam className={"min-h-screen"}>
+        <div className="flex min-h-screen items-center justify-center text-white">
+          <div className="bg-white p-8 rounded-lg shadow-lg w-full sm:w-96">
+            <h2 className="text-2xl font-semibold mb-6 text-center text-blue-700">Weight Loss Calculator</h2>
+            <form onSubmit={handleSubmit(onSubmit)} className="text-black">
+              {/* Gender Section */}
+              <fieldset className="mb-6">
+                <legend className="text-lg font-medium mb-2">Gender</legend>
+                <div className="flex items-center space-x-6">
+                  <label htmlFor="male" className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="male"
+                      value="male"
+                      {...register("gender", { required: "Gender is required" })}
+                      className="form-radio text-blue-500"
+                    />
+                    <span>Male</span>
+                  </label>
+                  <label htmlFor="female" className="flex items-center space-x-2">
+                    <input
+                      type="radio"
+                      id="female"
+                      value="female"
+                      {...register("gender", { required: "Gender is required" })}
+                      className="form-radio text-pink-500"
+                    />
+                    <span>Female</span>
+                  </label>
+                </div>
+                {errors.gender && <p className="text-red-500 text-sm">{errors.gender.message}</p>}
+              </fieldset>
+
+              {/* Age Section */}
+              <fieldset className="mb-6">
+                <legend className="text-lg font-medium mb-2">Age</legend>
+                <select
+                  id="age"
+                  {...register("age", { required: "Age is required" })}
+                  className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="18-24">18-24</option>
+                  <option value="25-34">25-34</option>
+                  <option value="35-44">35-44</option>
+                  <option value="45-54">45-54</option>
+                  <option value="55-64">55-64</option>
+                  <option value="65+">65+</option>
+                </select>
+                {errors.age && <p className="text-red-500 text-sm">{errors.age.message}</p>}
+              </fieldset>
+
+              {/* Height Section */}
+              <fieldset className="mb-6">
+                <legend className="text-lg font-medium mb-2">Height (cm)</legend>
+                <select
+                  id="height"
+                  {...register("height", { required: "Height is required" })}
+                  className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="150">150 cm</option>
+                  <option value="155">155 cm</option>
+                  <option value="160">160 cm</option>
+                  <option value="165">165 cm</option>
+                  <option value="170">170 cm</option>
+                  <option value="175">175 cm</option>
+                  <option value="180">180 cm</option>
+                  <option value="185">185 cm</option>
+                </select>
+                {errors.height && <p className="text-red-500 text-sm">{errors.height.message}</p>}
+              </fieldset>
+
+              {/* Current Weight Section */}
+              <fieldset className="mb-6">
+                <legend className="text-lg font-medium mb-2">Current Weight (kg)</legend>
+                <input
+                  type="number"
+                  id="currentWeight"
+                  placeholder="Enter your current weight"
+                  {...register("currentWeight", {
+                    required: "Current weight is required",
+                    min: { value: 1, message: "Weight must be a positive number" },
+                  })}
+                  className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {errors.currentWeight && <p className="text-red-500 text-sm">{errors.currentWeight.message}</p>}
+              </fieldset>
+
+              {/* Target Weight Section */}
+              <fieldset className="mb-6">
+                <legend className="text-lg font-medium mb-2">Target Weight (kg)</legend>
+                <input
+                  type="number"
+                  id="targetWeight"
+                  placeholder="Enter your target weight"
+                  {...register("targetWeight", {
+                    required: "Target weight is required",
+                    min: { value: 1, message: "Weight must be a positive number" },
+                  })}
+                  className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {errors.targetWeight && <p className="text-red-500 text-sm">{errors.targetWeight.message}</p>}
+              </fieldset>
+
+              {/* Submit Button */}
+              <div className="text-center">
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white py-2 px-6 rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Calculate
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        {dietData && <div className="max-w-7xl mx-auto p-6 bg-gray-100">
+
+          {/* Header */}
+          <header className="text-center mb-12">
+            <h1 className="text-4xl font-semibold text-blue-700">Weekly Diet & Exercise Plan</h1>
+            <p className="text-lg mt-2">Calorie Target: <span className="font-bold text-green-600">{dietData.calori_target}</span> kcal/day</p>
+          </header>
+
+          {/* Diet Plan Section */}
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="col-span-1 bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-2xl font-bold text-blue-500">Diet Plan</h2>
+              <p className="mt-4 text-gray-700">Follow the diet plan to maintain a healthy and balanced lifestyle.</p>
+
+              {/* Diet List */}
+              <div className="mt-6">
+                {dietData.diet?.map((day, index) => (
+                  <div key={index} className="border-t border-gray-200 pt-4">
+                    <h3 className="text-xl font-semibold text-blue-600">{day.day}</h3>
+                    <div className="mt-2 text-gray-800">
+                      <p><strong>Breakfast:</strong> {day.meals.breakfast}</p>
+                      <p><strong>Lunch:</strong> {day.meals.lunch}</p>
+                      <p><strong>Dinner:</strong> {day.meals.dinner}</p>
+                      <p><strong>Snacks:</strong> {day.meals.snacks}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Exercise Plan Section */}
+            <div className="col-span-1 bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-2xl font-bold text-blue-500">Exercise Plan</h2>
+              <p className="mt-4 text-gray-700">Stay active with a mix of cardio and strength training.</p>
+
+              {/* Cardio Exercises */}
+              <div className="mt-6">
+                <h3 className="text-xl font-semibold text-blue-600">Cardio</h3>
+                <ul className="mt-2 list-disc list-inside text-gray-800">
+                  {dietData.exercise?.cardio.map((exercise, index) => (
+                    <li key={index}><strong>{exercise.name}:</strong> {exercise.time}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Strength Training Exercises */}
+              <div className="mt-6">
+                <h3 className="text-xl font-semibold text-blue-600">Strength Training</h3>
+                <ul className="mt-2 list-disc list-inside text-gray-800">
+                  {dietData.exercise?.strength_training.map((exercise, index) => (
+                    <li key={index}><strong>{exercise.name}:</strong> {exercise.time}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </section>
+
+        </div>}
+      </AnimatedBeam>
+    </>
   );
 }
