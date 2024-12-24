@@ -14,5 +14,4 @@ export async function getResp(gender, height, age, currentWeight,targetWeight){
     console.log(json);
     const obj = JSON.parse(json);
     return obj;
-
 }
